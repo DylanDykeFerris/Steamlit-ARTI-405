@@ -1,3 +1,7 @@
+## Original code by Dr. Ayomide Afolabi
+## Adjustments made by Dylan Dyke for ARTI-405
+## Added sliders for leaf_size, degree, and min_samples_split
+
 import streamlit as st
 st.title("My Machine Learning Classifier App")
 
@@ -35,17 +39,30 @@ st.write("Number of classes:", len(set(y)))
 
 def add_parameter_ui(clf_name):
     params = dict()
+
     if clf_name == "KNN":
         K = st.sidebar.slider("K", 1, 15)
+        leaf_size = st.sidebar.slider("Leaf Size", 10, 100)
+
         params["K"] = K
+        params["leaf_size"] = leaf_size
+
     elif clf_name == "SVM":
         C = st.sidebar.slider("C", 0.01, 10.0)
+        degree = st.sidebar.slider("Degree", 1, 10)
+
         params["C"] = C
+        params["degree"] = degree
+
     else:
         max_depth = st.sidebar.slider("Max Depth", 2, 15)
         n_estimators = st.sidebar.slider("Number of Estimators", 1, 100)
+        min_samples_split = st.sidebar.slider("Min Samples Split", 2, 20)
+
         params["max_depth"] = max_depth
         params["n_estimators"] = n_estimators
+        params["min_samples_split"] = min_samples_split
+
     return params
 
 params = add_parameter_ui(classifier_name)
@@ -54,12 +71,27 @@ def get_classifier(clf_name, params):
     from sklearn.neighbors import KNeighborsClassifier
     from sklearn.svm import SVC
     from sklearn.ensemble import RandomForestClassifier
+
     if clf_name == "KNN":
-        clf = KNeighborsClassifier(n_neighbors=params["K"])
+        clf = KNeighborsClassifier(
+            n_neighbors=params["K"],
+            leaf_size=params["leaf_size"]
+        )
+
     elif clf_name == "SVM":
-        clf = SVC(C=params["C"])
+        clf = SVC(
+            C=params["C"],
+            degree=params["degree"],
+            kernel="poly"
+        )
+
     else:
-        clf = RandomForestClassifier(max_depth=params["max_depth"], n_estimators=params["n_estimators"])
+        clf = RandomForestClassifier(
+            max_depth=params["max_depth"],
+            n_estimators=params["n_estimators"],
+            min_samples_split=params["min_samples_split"]
+        )
+
     return clf
 
 clf = get_classifier(classifier_name, params)
